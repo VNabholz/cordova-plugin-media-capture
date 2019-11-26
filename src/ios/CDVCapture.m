@@ -106,6 +106,10 @@
         // all the work occurs here
         CDVAudioRecorderViewController* audioViewController = [[CDVAudioRecorderViewController alloc] initWithCommand:self duration:duration callbackId:callbackId];
 
+        if (@available(iOS 13.0, *)) {
+            audioViewController.modalInPresentation = YES;
+        }
+
         // Now create a nav controller and display the view...
         CDVAudioNavigationController* navController = [[CDVAudioNavigationController alloc] initWithRootViewController:audioViewController];
 
@@ -607,6 +611,7 @@
 @interface CDVAudioRecorderViewController () {
     UIStatusBarStyle _previousStatusBarStyle;
 }
+@property (nonatomic, getter=isModalInPresentation) BOOL modalInPresentation;
 @end
 
 @implementation CDVAudioRecorderViewController
