@@ -654,71 +654,109 @@
 
 - (void)loadView
 {
-	if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) {
+    if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) {
         self.edgesForExtendedLayout = UIRectEdgeNone;
     }
 
+    NSBundle* cdvBundle = [NSBundle bundleForClass:[CDVCapture class]];
+
+    self.recordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/record_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
+    self.stopRecordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/stop_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
+     UIImage* grayBkg = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/controls_bg"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
+
     // create view and display
-    CGRect viewRect = [[UIScreen mainScreen] applicationFrame];
+    CGSize statusBarSize = [[UIApplication sharedApplication] statusBarFrame].size;
+
+    CGRect viewRect = [[UIScreen mainScreen] bounds];
     UIView* tmp = [[UIView alloc] initWithFrame:viewRect];
+    [tmp setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
 
-    // make backgrounds
-    NSString* microphoneResource = @"CDVCapture.bundle/microphone";
+    int viewHeight = viewRect.size.height;
+    int viewWidth = viewRect.size.width;
 
-    BOOL isIphone5 = ([[UIScreen mainScreen] bounds].size.width == 568 && [[UIScreen mainScreen] bounds].size.height == 320) || ([[UIScreen mainScreen] bounds].size.height == 568 && [[UIScreen mainScreen] bounds].size.width == 320);
-    if (isIphone5) {
-        microphoneResource = @"CDVCapture.bundle/microphone-568h";
+    float minSize = MIN(viewRect.size.height, viewRect.size.width);
+    float maxSize = MAX(viewRect.size.height, viewRect.size.width);
+
+    NSString *spacialFormat = [NSString stringWithFormat:@"1.33"];
+    NSString *deviceFormat = [NSString stringWithFormat:@"%.02f", floorf((maxSize / minSize) * 100) / 100];
+
+    BOOL isIpadProResolution = ([[UIScreen mainScreen] bounds].size.width == 1024 && [[UIScreen mainScreen] bounds].size.height == 1366) || ([[UIScreen mainScreen] bounds].size.height == 1024 && [[UIScreen mainScreen] bounds].size.width == 1366);
+    BOOL isIpadpro12 = [spacialFormat isEqualToString:deviceFormat] && [(NSString*)[UIDevice currentDevice].model hasPrefix:@"iPad"] && isIpadProResolution;
+
+    if (isIpadpro12) {
+
+        if(viewRect.size.width < viewRect.size.height){
+            viewHeight = viewHeight / 1.6; // Portrait
+        } else {
+            viewHeight = viewHeight * 0.75; // Landscape
+        }
+
+    } else {
+        viewHeight = viewHeight / 1.4;
     }
 
-    NSBundle* cdvBundle = [NSBundle bundleForClass:[CDVCapture class]];
-    UIImage* microphone = [UIImage imageNamed:[self resolveImageResource:microphoneResource] inBundle:cdvBundle compatibleWithTraitCollection:nil];
-    UIView* microphoneView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, viewRect.size.width, microphone.size.height)];
-    [microphoneView setBackgroundColor:[UIColor colorWithPatternImage:microphone]];
+    UIView* microphoneView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, viewRect.size.width, viewHeight)];
+    [microphoneView setBackgroundColor: [UIColor colorWithRed:0.42 green:0.42 blue:0.42 alpha:0.9]];
     [microphoneView setUserInteractionEnabled:NO];
     [microphoneView setIsAccessibilityElement:NO];
     [tmp addSubview:microphoneView];
 
     // add bottom bar view
-    UIImage* grayBkg = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/controls_bg"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
-    UIView* controls = [[UIView alloc] initWithFrame:CGRectMake(0, microphone.size.height, viewRect.size.width, grayBkg.size.height)];
-    [controls setBackgroundColor:[UIColor colorWithPatternImage:grayBkg]];
+
+    UIView* controls = [[UIView alloc] initWithFrame:CGRectMake(0, viewHeight, viewRect.size.width, viewHeight)];
+        [controls setBackgroundColor: [UIColor colorWithRed:0.38 green:0.38 blue:0.38 alpha:0.95]];
     [controls setUserInteractionEnabled:NO];
     [controls setIsAccessibilityElement:NO];
     [tmp addSubview:controls];
 
-    // make red recording background view
-    UIImage* recordingBkg = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/recording_bg"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
-    UIColor* background = [UIColor colorWithPatternImage:recordingBkg];
-    self.recordingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, viewRect.size.width, recordingBkg.size.height)];
-    [self.recordingView setBackgroundColor:background];
-    [self.recordingView setHidden:YES];
-    [self.recordingView setUserInteractionEnabled:NO];
-    [self.recordingView setIsAccessibilityElement:NO];
-    [tmp addSubview:self.recordingView];
+    int xAxis = (viewWidth);
+    float portraitConstant = 3.1;
+    float landscapeConstant = 0.25;
 
-    // add label
-    self.timerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, viewRect.size.width, recordingBkg.size.height)];
-    // timerLabel.autoresizingMask = reSizeMask;
+    if (isIpadpro12) {
+
+        if(viewRect.size.width < viewRect.size.height){
+          xAxis /= portraitConstant;
+        } else {
+          xAxis *= landscapeConstant;
+        }
+
+        self.timerLabel = [[UILabel alloc] initWithFrame:CGRectMake(xAxis, 0, viewWidth, viewHeight)];
+    } else {
+        xAxis /= 2;
+        self.timerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, viewWidth, viewHeight)];
+        [self.timerLabel setTextAlignment:NSTextAlignmentCenter];
+    }
+
     [self.timerLabel setBackgroundColor:[UIColor clearColor]];
     [self.timerLabel setTextColor:[UIColor whiteColor]];
-#ifdef __IPHONE_6_0
-    [self.timerLabel setTextAlignment:NSTextAlignmentCenter];
-#else
-    // for iOS SDK < 6.0
-    [self.timerLabel setTextAlignment:UITextAlignmentCenter];
-#endif
-    [self.timerLabel setText:@"0:00"];
+
+
+    [self.timerLabel setText:@"00:00"];
     [self.timerLabel setAccessibilityHint:PluginLocalizedString(captureCommand, @"recorded time in minutes and seconds", nil)];
     self.timerLabel.accessibilityTraits |= UIAccessibilityTraitUpdatesFrequently;
     self.timerLabel.accessibilityTraits &= ~UIAccessibilityTraitStaticText;
     [tmp addSubview:self.timerLabel];
 
     // Add record button
-
-    self.recordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/record_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
-    self.stopRecordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/stop_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
     self.recordButton.accessibilityTraits |= [self accessibilityTraits];
-    self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake((viewRect.size.width - recordImage.size.width) / 2, (microphone.size.height + (grayBkg.size.height - recordImage.size.height) / 2), recordImage.size.width, recordImage.size.height)];
+
+
+    if (isIpadpro12) {
+        xAxis = viewWidth - (recordImage.size.width / 2);
+
+        if(viewRect.size.width < viewRect.size.height){
+          xAxis /= portraitConstant;
+        } else {
+          xAxis *= landscapeConstant;
+        }
+
+        self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake(xAxis,  ((viewHeight) + ((grayBkg.size.height - recordImage.size.height) / 2) - recordImage.size.height / 2), recordImage.size.width, recordImage.size.height)]; // portrait
+    } else {
+        self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake((viewWidth - recordImage.size.width) / 2, (viewHeight + (grayBkg.size.height - recordImage.size.height) / 2), recordImage.size.width, recordImage.size.height)];
+    }
+
+
     [self.recordButton setAccessibilityLabel:PluginLocalizedString(captureCommand, @"toggle audio recording", nil)];
     [self.recordButton setImage:recordImage forState:UIControlStateNormal];
     [self.recordButton addTarget:self action:@selector(processButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -837,7 +875,7 @@
                 } else {
                     [weakSelf.avRecorder record];
                 }
-                [weakSelf.timerLabel setText:@"0.00"];
+                [weakSelf.timerLabel setText:@"00:00"];
                 weakSelf.timer = [NSTimer scheduledTimerWithTimeInterval:0.5f target:weakSelf selector:@selector(updateTime) userInfo:nil repeats:YES];
                 weakSelf.doneButton.enabled = NO;
             }
@@ -932,7 +970,7 @@
     int min = interval / 60;
 
     if (interval < 60) {
-        return [NSString stringWithFormat:@"0:%02d", interval];
+        return [NSString stringWithFormat:@"00:%02d", interval];
     } else {
         return [NSString stringWithFormat:@"%d:%02d", min, secs];
     }
