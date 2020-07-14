@@ -730,7 +730,7 @@
 
     [self.timerLabel setBackgroundColor:[UIColor clearColor]];
     [self.timerLabel setTextColor:[UIColor whiteColor]];
-
+    [self.timerLabel setFont:[UIFont systemFontOfSize:90]];
 
     [self.timerLabel setText:@"00:00"];
     [self.timerLabel setAccessibilityHint:PluginLocalizedString(captureCommand, @"recorded time in minutes and seconds", nil)];
