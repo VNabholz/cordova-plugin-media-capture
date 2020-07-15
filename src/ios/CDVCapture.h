@@ -112,6 +112,8 @@ typedef NSUInteger CDVCaptureError;
 
 - (id)initWithCommand:(CDVPlugin*)theCommand duration:(NSNumber*)theDuration callbackId:(NSString*)theCallbackId;
 - (void)processButton:(id)sender;
+- (void)processButtonAction:(id)sender;
+- (void)selectAudioModalAction:(id)sender;
 - (void)stopRecordingCleanup;
 - (void)dismissAudioView:(id)sender;
 - (NSString*)formatTime:(int)interval;

@@ -759,7 +759,7 @@
 
     [self.recordButton setAccessibilityLabel:PluginLocalizedString(captureCommand, @"toggle audio recording", nil)];
     [self.recordButton setImage:recordImage forState:UIControlStateNormal];
-    [self.recordButton addTarget:self action:@selector(processButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.recordButton addTarget:self action:@selector(processButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     [tmp addSubview:recordButton];
 
     // make and add done button to navigation bar
@@ -845,6 +845,50 @@
     [self.captureCommand setInUse:NO];
 }
 
+- (void)selectAudioModalAction:(id)sender
+{
+     UIAlertController * alert = [UIAlertController
+                                 alertControllerWithTitle:PluginLocalizedString(captureCommand, @"overwrite modal title", nil)
+                                 message:PluginLocalizedString(captureCommand, @"overwrite modal description", nil)
+                                 preferredStyle:UIAlertControllerStyleAlert];
+
+    //Add Buttons
+    UIAlertAction* saveButton = [UIAlertAction
+                                actionWithTitle:PluginLocalizedString(captureCommand, @"save", nil)
+                                style:UIAlertActionStyleDefault
+                                handler:^(UIAlertAction * action) {
+                                    [self dismissAudioView:(id)sender];
+                                }];
+
+    UIAlertAction* overwriteButton = [UIAlertAction
+                               actionWithTitle:PluginLocalizedString(captureCommand, @"overwrite", nil)
+                               style:UIAlertActionStyleDefault
+                               handler:^(UIAlertAction * action) {
+                                    [self processButton:(id) sender];
+                               }];
+
+    [alert addAction:saveButton];
+    [alert addAction:overwriteButton];
+
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)processButtonAction:(id)sender
+{
+    if (self.avRecorder.recording) {
+        // stop recording
+        [self.avRecorder stop];
+        self.isTimed = NO;  // recording was stopped via button so reset isTimed
+        // view cleanup will occur in audioRecordingDidFinishRecording
+    } else {
+        if (!self.pluginResult) {
+            [self processButton:(id) sender];
+        } else {
+            [self selectAudioModalAction:(id) sender];
+        }
+    }
+}
+
 - (void)processButton:(id)sender
 {
     if (self.avRecorder.recording) {
@@ -862,25 +906,25 @@
         __weak CDVAudioRecorderViewController* weakSelf = self;
 
         void (^startRecording)(void) = ^{
-            [weakSelf.avSession setCategory:AVAudioSessionCategoryRecord error:&error];
-            [weakSelf.avSession setActive:YES error:&error];
-            if (error) {
-                // can't continue without active audio session
-                weakSelf.errorCode = CAPTURE_INTERNAL_ERR;
-                [weakSelf dismissAudioView:nil];
-            } else {
-                if (weakSelf.duration) {
-                    weakSelf.isTimed = true;
-                    [weakSelf.avRecorder recordForDuration:[duration doubleValue]];
-                } else {
-                    [weakSelf.avRecorder record];
-                }
-                [weakSelf.timerLabel setText:@"00:00"];
-                weakSelf.timer = [NSTimer scheduledTimerWithTimeInterval:0.5f target:weakSelf selector:@selector(updateTime) userInfo:nil repeats:YES];
-                weakSelf.doneButton.enabled = NO;
-            }
-            UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
-        };
+                 [weakSelf.avSession setCategory:AVAudioSessionCategoryRecord error:&error];
+                 [weakSelf.avSession setActive:YES error:&error];
+                 if (error) {
+                     // can't continue without active audio session
+                     weakSelf.errorCode = CAPTURE_INTERNAL_ERR;
+                     [weakSelf dismissAudioView:nil];
+                 } else {
+                     if (weakSelf.duration) {
+                         weakSelf.isTimed = true;
+                         [weakSelf.avRecorder recordForDuration:[duration doubleValue]];
+                     } else {
+                         [weakSelf.avRecorder record];
+                     }
+                     [weakSelf.timerLabel setText:@"00:00"];
+                     weakSelf.timer = [NSTimer scheduledTimerWithTimeInterval:0.5f target:weakSelf selector:@selector(updateTime) userInfo:nil repeats:YES];
+                     weakSelf.doneButton.enabled = NO;
+                 }
+                 UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+             };
 
         SEL rrpSel = NSSelectorFromString(@"requestRecordPermission:");
         if ([self.avSession respondsToSelector:rrpSel])

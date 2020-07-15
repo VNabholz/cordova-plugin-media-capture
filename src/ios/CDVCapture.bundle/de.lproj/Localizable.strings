@@ -17,7 +17,6 @@
  under the License.
  */
 
-
 // controller title for Videos
 "Videos title" = "Videos";
 // accessibility label for recording button
@@ -26,3 +25,9 @@
 "timed recording complete" = "programmierte Aufnahme beendet";
 // accessibility hint for display of recorded elapsed time
 "recorded time in minutes and seconds" = "aufgenommene Zeit in Minuten und Sekunden";
+
+// overwrite modal
+"overwrite modal title" = "Achtung!";
+"overwrite modal description" = "Die Aufnahme wurde gestoppt und noch nicht gespeichert!\nSoll die aktuelle Aufnahme vorher gespeichert werden oder möchten Sie diese überschreiben?";
+"save" = "Speichern";
+"overwrite" = "Überschreiben";

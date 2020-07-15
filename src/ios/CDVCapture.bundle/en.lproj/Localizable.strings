@@ -25,3 +25,9 @@
 "timed recording complete" = "timed recording complete";
 // accessibility hint for display of recorded elapsed time
 "recorded time in minutes and seconds" = "recorded time in minutes and seconds";
+
+// overwrite modal
+"overwrite modal title" = "Attention!";
+"overwrite modal description" = "The recording has been stopped and has not yet been saved!\nDo you want to save the current recording beforehand or do you want to overwrite it?";
+"save" = "Save";
+"overwrite" = "Overwrite";
