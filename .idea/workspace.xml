@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="3f9dbc10-b0b3-42ba-8334-828e63da1547" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.asf.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/android/FileProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/android/xml/mediacapture_provider_paths.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.appveyor.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.appveyor.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.eslintrc.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.eslintrc.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.npmignore" beforeDir="false" afterPath="$PROJECT_DIR$/.npmignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.travis.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.travis.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONTRIBUTING.md" beforeDir="false" afterPath="$PROJECT_DIR$/CONTRIBUTING.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/plugin.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/android/Capture.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/android/Capture.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/browser/CaptureProxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/browser/CaptureProxy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ios/CDVCapture.m" beforeDir="false" afterPath="$PROJECT_DIR$/src/ios/CDVCapture.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/windows/CaptureProxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/windows/CaptureProxy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/windows/MediaFile.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/windows/MediaFile.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/tests.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/CaptureAudioOptions.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/CaptureAudioOptions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/CaptureError.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/CaptureError.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/CaptureImageOptions.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/CaptureImageOptions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/CaptureVideoOptions.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/CaptureVideoOptions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/ConfigurationData.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/ConfigurationData.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/MediaFile.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/MediaFile.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/MediaFileData.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/MediaFileData.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/android/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/android/init.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/capture.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/capture.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/helpers.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/helpers.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2G4C8Rp673Yf9aAPcrQ5zjuqp3i" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Project.color": "1e292d",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3f9dbc10-b0b3-42ba-8334-828e63da1547" name="Changes" comment="" />
+      <created>1665638309483</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1665638309483</updated>
+      <workItem from="1665638311259" duration="859000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
