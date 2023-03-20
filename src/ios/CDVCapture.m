@@ -765,6 +765,7 @@
     self.doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissAudioView:)];
     [self.doneButton setStyle:UIBarButtonItemStyleDone];
     self.navigationItem.rightBarButtonItem = self.doneButton;
+    self.navigationController.navigationBar.backgroundColor = [UIColor colorWithRed:0.38 green:0.38 blue:0.38 alpha:0.95];
 
     [self setView:tmp];
 }
