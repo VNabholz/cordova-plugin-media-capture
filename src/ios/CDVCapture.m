@@ -658,11 +658,6 @@
 
     self.recordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/record_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
     self.stopRecordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/stop_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
-     UIImage* grayBkg = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/controls_bg"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
-
-    // create view and display
-    // CHECK THAT!
-    CGSize statusBarSize = [[UIApplication sharedApplication] statusBarFrame].size;
 
     CGRect viewRect = [[UIScreen mainScreen] bounds];
     UIView* tmp = [[UIView alloc] initWithFrame:viewRect];
@@ -688,7 +683,8 @@
             viewHeight = viewHeight * 0.75; // Landscape
         }
 
-    } else {
+    }
+    else {
         viewHeight = viewHeight / 1.4;
     }
 
@@ -707,54 +703,55 @@
     [tmp addSubview:controls];
 
     int xAxis = (viewWidth);
-    float portraitConstant = 3.1;
-    float landscapeConstant = 0.25;
+    int w = viewRect.size.width;
+    int h = viewHeight;
 
-    if (isIpadpro12) {
+    self.timerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
 
-        if(viewRect.size.width < viewRect.size.height){
-          xAxis /= portraitConstant;
-        } else {
-          xAxis *= landscapeConstant;
-        }
-
-        self.timerLabel = [[UILabel alloc] initWithFrame:CGRectMake(xAxis, 0, viewWidth, viewHeight)];
-    } else {
-        xAxis /= 2;
-        self.timerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, viewWidth, viewHeight)];
-        [self.timerLabel setTextAlignment:NSTextAlignmentCenter];
-    }
-
+    [self.timerLabel setTextAlignment:NSTextAlignmentCenter];
     [self.timerLabel setBackgroundColor:[UIColor clearColor]];
     [self.timerLabel setTextColor:[UIColor whiteColor]];
-
     [self.timerLabel setFont:[UIFont systemFontOfSize:90]];
     [self.timerLabel setTextAlignment:NSTextAlignmentCenter];
     [self.timerLabel setText:@"00:00"];
+    [self.timerLabel sizeToFit];
 
+
+    int timerLabelW = self.timerLabel.frame.size.width + 20;
+    int timerLabelH = self.timerLabel.frame.size.height + 20;
+    int startW = (w - timerLabelW) / 2;
+    int startH = (h - timerLabelH) / 2;
+
+    if (isIpadpro12) {
+        startW = (w / 4) - (timerLabelW - 20) / 2;
+        startH = (h - timerLabelH) / 2;
+    }
+
+    [self.timerLabel setFrame:CGRectMake(startW, startH, cW, cH)];
     [self.timerLabel setAccessibilityHint:PluginLocalizedString(captureCommand, @"recorded time in minutes and seconds", nil)];
+
     self.timerLabel.accessibilityTraits |= UIAccessibilityTraitUpdatesFrequently;
     self.timerLabel.accessibilityTraits &= ~UIAccessibilityTraitStaticText;
+
     [tmp addSubview:self.timerLabel];
 
     // Add record button
     self.recordButton.accessibilityTraits |= [self accessibilityTraits];
 
 
+
+    startW = (w - recordImage.size.width) / 2;
+    startH = h + 15;
+
+    int rw = recordImage.size.width;
+    int rh = recordImage.size.height;
+
     if (isIpadpro12) {
-        xAxis = viewWidth - (recordImage.size.width / 2);
-
-        if(viewRect.size.width < viewRect.size.height){
-          xAxis /= portraitConstant;
-        } else {
-          xAxis *= landscapeConstant;
-        }
-
-        self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake(xAxis,  ((viewHeight) + ((grayBkg.size.height - recordImage.size.height) / 2) - recordImage.size.height / 2), recordImage.size.width, recordImage.size.height)]; // portrait
-    } else {
-        self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake((viewWidth - recordImage.size.width) / 2, (viewHeight + (grayBkg.size.height - recordImage.size.height) / 2), recordImage.size.width, recordImage.size.height)];
+        startW = (w / 4) - (recordImage.size.width / 2);
+        startH = h; // 1.23 protrait
     }
 
+    self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake(startW, startH, recordImage.size.width, recordImage.size.height)];
 
     [self.recordButton setAccessibilityLabel:PluginLocalizedString(captureCommand, @"toggle audio recording", nil)];
     [self.recordButton setImage:recordImage forState:UIControlStateNormal];
@@ -769,6 +766,7 @@
 
     [self setView:tmp];
 }
+
 
 - (void)viewDidLoad
 {
@@ -788,7 +786,6 @@
     }
 
     [self.avSession setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
-
 
     // create file to record to in temporary dir
 
@@ -1033,3 +1030,4 @@
 }
 
 @end
+
