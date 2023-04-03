@@ -727,7 +727,7 @@
         startH = (h - timerLabelH) / 2;
     }
 
-    [self.timerLabel setFrame:CGRectMake(startW, startH, cW, cH)];
+    [self.timerLabel setFrame:CGRectMake(startW, startH, timerLabelW, timerLabelH];
     [self.timerLabel setAccessibilityHint:PluginLocalizedString(captureCommand, @"recorded time in minutes and seconds", nil)];
 
     self.timerLabel.accessibilityTraits |= UIAccessibilityTraitUpdatesFrequently;
