@@ -659,52 +659,35 @@
     self.recordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/record_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
     self.stopRecordImage = [UIImage imageNamed:[self resolveImageResource:@"CDVCapture.bundle/stop_button"] inBundle:cdvBundle compatibleWithTraitCollection:nil];
 
-    CGRect viewRect = [[UIScreen mainScreen] bounds];
+    self.doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissAudioView:)];
+    [self.doneButton setStyle:UIBarButtonItemStyleDone];
+    self.navigationItem.rightBarButtonItem = self.doneButton;
+    self.navigationController.navigationBar.backgroundColor = [UIColor colorWithRed:0.38 green:0.38 blue:0.38 alpha:0.95];
+
+    int modalWidth = self.navigationController.view.bounds.size.width;
+    int modalHeight = self.navigationController.view.bounds.size.height;
+    int controlsHeight = recordImage.size.height * 2;
+    int mainViewHeight = modalHeight - controlsHeight - self.navigationController.navigationBar.bounds.size.height;
+
+    CGRect viewRect = CGRectMake(0, 0, modalWidth,  mainViewHeight);
+
     UIView* tmp = [[UIView alloc] initWithFrame:viewRect];
     [tmp setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
 
-    int viewHeight = viewRect.size.height;
-    int viewWidth = viewRect.size.width;
 
-    float minSize = MIN(viewRect.size.height, viewRect.size.width);
-    float maxSize = MAX(viewRect.size.height, viewRect.size.width);
-
-    NSString *spacialFormat = [NSString stringWithFormat:@"1.33"];
-    NSString *deviceFormat = [NSString stringWithFormat:@"%.02f", floorf((maxSize / minSize) * 100) / 100];
-
-    BOOL isIpadProResolution = ([[UIScreen mainScreen] bounds].size.width == 1024 && [[UIScreen mainScreen] bounds].size.height == 1366) || ([[UIScreen mainScreen] bounds].size.height == 1024 && [[UIScreen mainScreen] bounds].size.width == 1366);
-    BOOL isIpadpro12 = [spacialFormat isEqualToString:deviceFormat] && [(NSString*)[UIDevice currentDevice].model hasPrefix:@"iPad"] && isIpadProResolution;
-
-    if (isIpadpro12) {
-
-        if(viewRect.size.width < viewRect.size.height){
-            viewHeight = viewHeight / 1.6; // Portrait
-        } else {
-            viewHeight = viewHeight * 0.75; // Landscape
-        }
-
-    }
-    else {
-        viewHeight = viewHeight / 1.4;
-    }
-
-    UIView* microphoneView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, viewRect.size.width, viewHeight)];
+    UIView* microphoneView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, modalWidth, mainViewHeight)];
     [microphoneView setBackgroundColor: [UIColor colorWithRed:0.42 green:0.42 blue:0.42 alpha:0.9]];
     [microphoneView setUserInteractionEnabled:NO];
     [microphoneView setIsAccessibilityElement:NO];
     [tmp addSubview:microphoneView];
 
     // add bottom bar view
-
-    UIView* controls = [[UIView alloc] initWithFrame:CGRectMake(0, viewHeight, viewRect.size.width, viewHeight)];
-        [controls setBackgroundColor: [UIColor colorWithRed:0.38 green:0.38 blue:0.38 alpha:0.95]];
+    UIView* controls = [[UIView alloc] initWithFrame:CGRectMake(0, mainViewHeight, modalWidth, controlsHeight)];
+    [controls setBackgroundColor: [UIColor colorWithRed:0.38 green:0.38 blue:0.38 alpha:0.95]];
     [controls setUserInteractionEnabled:NO];
     [controls setIsAccessibilityElement:NO];
     [tmp addSubview:controls];
 
-    int xAxis = (viewWidth);
-    int w = viewRect.size.width;
-    int h = viewHeight;
 
     self.timerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
 
@@ -717,17 +700,11 @@
     [self.timerLabel sizeToFit];
 
 
-    int timerLabelW = self.timerLabel.frame.size.width + 20;
-    int timerLabelH = self.timerLabel.frame.size.height + 20;
-    int startW = (w - timerLabelW) / 2;
-    int startH = (h - timerLabelH) / 2;
+    int timerLabelWidth = self.timerLabel.frame.size.width;
+    int timerLabelHeight = self.timerLabel.frame.size.height;
+    int startHeight = (mainViewHeight - timerLabelHeight) / 2;
 
-    if (isIpadpro12) {
-        startW = (w / 4) - (timerLabelW - 20) / 2;
-        startH = (h - timerLabelH) / 2;
-    }
-
-    [self.timerLabel setFrame:CGRectMake(startW, startH, timerLabelW, timerLabelH)];
+    [self.timerLabel setFrame:CGRectMake(0, startHeight, modalWidth, timerLabelHeight)];
     [self.timerLabel setAccessibilityHint:PluginLocalizedString(captureCommand, @"recorded time in minutes and seconds", nil)];
 
     self.timerLabel.accessibilityTraits |= UIAccessibilityTraitUpdatesFrequently;
@@ -738,31 +715,14 @@
     // Add record button
     self.recordButton.accessibilityTraits |= [self accessibilityTraits];
 
+    startHeight = mainViewHeight  + (controlsHeight - recordImage.size.height) / 2;
 
-
-    startW = (w - recordImage.size.width) / 2;
-    startH = h + 15;
-
-    int rw = recordImage.size.width;
-    int rh = recordImage.size.height;
-
-    if (isIpadpro12) {
-        startW = (w / 4) - (recordImage.size.width / 2);
-        startH = h; // 1.23 protrait
-    }
-
-    self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake(startW, startH, recordImage.size.width, recordImage.size.height)];
+    self.recordButton = [[UIButton alloc] initWithFrame:CGRectMake(0, startHeight, modalWidth, recordImage.size.height)];
 
     [self.recordButton setAccessibilityLabel:PluginLocalizedString(captureCommand, @"toggle audio recording", nil)];
     [self.recordButton setImage:recordImage forState:UIControlStateNormal];
     [self.recordButton addTarget:self action:@selector(processButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     [tmp addSubview:recordButton];
-
-    // make and add done button to navigation bar
-    self.doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissAudioView:)];
-    [self.doneButton setStyle:UIBarButtonItemStyleDone];
-    self.navigationItem.rightBarButtonItem = self.doneButton;
-    self.navigationController.navigationBar.backgroundColor = [UIColor colorWithRed:0.38 green:0.38 blue:0.38 alpha:0.95];
 
     [self setView:tmp];
 }
