@@ -1,29 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="3f9dbc10-b0b3-42ba-8334-828e63da1547" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.asf.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/android/FileProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/android/xml/mediacapture_provider_paths.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.appveyor.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.appveyor.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.eslintrc.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.eslintrc.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/workflows/android.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/workflows/chrome.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/workflows/ios.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/workflows/lint.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ios/CDVCapture.bundle/fr.lproj/Localizable.strings" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.appveyor.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/ISSUE_TEMPLATE/SUPPORT_QUESTION.md" beforeDir="false" afterPath="$PROJECT_DIR$/.github/ISSUE_TEMPLATE/SUPPORT_QUESTION.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.npmignore" beforeDir="false" afterPath="$PROJECT_DIR$/.npmignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.travis.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.travis.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CONTRIBUTING.md" beforeDir="false" afterPath="$PROJECT_DIR$/CONTRIBUTING.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.travis.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RELEASENOTES.md" beforeDir="false" afterPath="$PROJECT_DIR$/RELEASENOTES.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/plugin.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/android/Capture.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/android/Capture.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/browser/CaptureProxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/browser/CaptureProxy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ios/CDVCapture.bundle/de.lproj/Localizable.strings" beforeDir="false" afterPath="$PROJECT_DIR$/src/ios/CDVCapture.bundle/de.lproj/Localizable.strings" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ios/CDVCapture.bundle/en.lproj/Localizable.strings" beforeDir="false" afterPath="$PROJECT_DIR$/src/ios/CDVCapture.bundle/en.lproj/Localizable.strings" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ios/CDVCapture.bundle/es.lproj/Localizable.strings" beforeDir="false" afterPath="$PROJECT_DIR$/src/ios/CDVCapture.bundle/es.lproj/Localizable.strings" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ios/CDVCapture.bundle/se.lproj/Localizable.strings" beforeDir="false" afterPath="$PROJECT_DIR$/src/ios/CDVCapture.bundle/se.lproj/Localizable.strings" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ios/CDVCapture.m" beforeDir="false" afterPath="$PROJECT_DIR$/src/ios/CDVCapture.m" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/windows/CaptureProxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/windows/CaptureProxy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/windows/MediaFile.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/windows/MediaFile.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/tests/plugin.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/tests.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/CaptureAudioOptions.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/CaptureAudioOptions.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/CaptureError.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/CaptureError.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/CaptureImageOptions.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/CaptureImageOptions.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/CaptureVideoOptions.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/CaptureVideoOptions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/www/ConfigurationData.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/ConfigurationData.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/MediaFile.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/MediaFile.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/MediaFileData.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/MediaFileData.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/android/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/android/init.js" afterDir="false" />
@@ -41,23 +53,29 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="2G4C8Rp673Yf9aAPcrQ5zjuqp3i" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Project.color": "1e292d",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Project.color&quot;: &quot;1e292d&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Merging master&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -67,6 +85,18 @@
       <option name="presentableId" value="Default" />
       <updated>1665638309483</updated>
       <workItem from="1665638311259" duration="859000" />
+      <workItem from="1692693843767" duration="5697000" />
+      <workItem from="1692770814313" duration="1654000" />
+      <workItem from="1692853598723" duration="547000" />
+      <workItem from="1692943205736" duration="2610000" />
+      <workItem from="1692967697210" duration="237000" />
+      <workItem from="1693203225599" duration="147000" />
+      <workItem from="1693207011632" duration="175000" />
+      <workItem from="1693209278124" duration="152000" />
+      <workItem from="1693209450968" duration="1926000" />
+      <workItem from="1693404897213" duration="2787000" />
+      <workItem from="1693430770970" duration="484000" />
+      <workItem from="1693459459273" duration="1113000" />
     </task>
     <servers />
   </component>

@@ -224,9 +224,10 @@
         options = [NSDictionary dictionary];
     }
 
-    // options could contain limit, duration and mode
+    // options could contain limit, duration, quality and mode
     // taking more than one video (limit) is only supported if provide own controls via cameraOverlayView property
     NSNumber* duration = [options objectForKey:@"duration"];
+    NSNumber* quality = [options objectForKey:@"quality"];
     NSString* mediaType = nil;
 
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
@@ -270,7 +271,18 @@
         // iOS 4.0
         if ([pickerController respondsToSelector:@selector(cameraCaptureMode)]) {
             pickerController.cameraCaptureMode = UIImagePickerControllerCameraCaptureModeVideo;
-            // pickerController.videoQuality = UIImagePickerControllerQualityTypeHigh;
+            switch ((int) (quality ? [quality doubleValue] * 10 : -1)) {
+                case 0:
+                    pickerController.videoQuality = UIImagePickerControllerQualityTypeLow;
+                    break;
+                case 5:
+                    pickerController.videoQuality = UIImagePickerControllerQualityTypeMedium;
+                    break;
+                case 10:
+                default:
+                    pickerController.videoQuality = UIImagePickerControllerQualityTypeHigh;
+                    break;
+            }
             // pickerController.cameraDevice = UIImagePickerControllerCameraDeviceRear;
             // pickerController.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;
         }
@@ -494,7 +506,7 @@
 - (NSDictionary*)getMediaDictionaryFromPath:(NSString*)fullPath ofType:(NSString*)type
 {
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
-    NSMutableDictionary* fileDict = [NSMutableDictionary dictionaryWithCapacity:5];
+    NSMutableDictionary* fileDict = [NSMutableDictionary dictionaryWithCapacity:6];
 
     CDVFile *fs = [self.commandDelegate getCommandInstance:@"File"];
 
@@ -511,14 +523,15 @@
         [fileDict setObject:[url absoluteURL] forKey:@"localURL"];
     }
     // determine type
-    if (!type) {
+    NSString* mimeType = type;
+    if (!mimeType) {
         id command = [self.commandDelegate getCommandInstance:@"File"];
         if ([command isKindOfClass:[CDVFile class]]) {
             CDVFile* cdvFile = (CDVFile*)command;
-            NSString* mimeType = [cdvFile getMimeTypeFromPath:fullPath];
-            [fileDict setObject:(mimeType != nil ? (NSObject*)mimeType : [NSNull null]) forKey:@"type"];
+            mimeType = [cdvFile getMimeTypeFromPath:fullPath];
         }
     }
+    [fileDict setObject:(mimeType != nil ? (NSObject*)mimeType : [NSNull null]) forKey:@"type"];
     NSDictionary* fileAttrs = [fileMgr attributesOfItemAtPath:fullPath error:nil];
     [fileDict setObject:[NSNumber numberWithUnsignedLongLong:[fileAttrs fileSize]] forKey:@"size"];
     NSDate* modDate = [fileAttrs fileModificationDate];
@@ -604,7 +617,7 @@
 
 @end
 
-@interface CDVAudioRecorderViewController () {
+@interface CDVAudioRecorderViewController () <UIAdaptivePresentationControllerDelegate> {
     UIStatusBarStyle _previousStatusBarStyle;
 }
 @property (nonatomic, getter=isModalInPresentation) BOOL modalInPresentation;
@@ -648,9 +661,64 @@
     return nil;
 }
 
-- (void)loadView
+- (void)viewDidLoad
 {
-    if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) {
+    [super viewDidLoad];
+    UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, nil);
+    NSError* error = nil;
+
+    // Add delegate to catch the dismiss event
+    self.navigationController.presentationController.delegate = self;
+
+    if (self.avSession == nil) {
+        // create audio session
+        self.avSession = [AVAudioSession sharedInstance];
+        if (error) {
+            // return error if can't create recording audio session
+            NSLog(@"error creating audio session: %@", [[error userInfo] description]);
+            self.errorCode = CAPTURE_INTERNAL_ERR;
+            [self dismissAudioView:nil];
+        }
+    }
+
+    [self.avSession setCategory:AVAudioSessionCategoryPlayAndRecord error:&error];
+    
+    // create file to record to in temporary dir
+
+    NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];   // use file system temporary directory
+    NSError* err = nil;
+    NSFileManager* fileMgr = [[NSFileManager alloc] init];
+
+    // generate unique file name
+    NSString* filePath;
+    int i = 1;
+    do {
+        filePath = [NSString stringWithFormat:@"%@/audio_%03d.wav", docsPath, i++];
+    } while ([fileMgr fileExistsAtPath:filePath]);
+
+    NSURL* fileURL = [NSURL fileURLWithPath:filePath isDirectory:NO];
+
+    // create AVAudioPlayer
+    NSDictionary *recordSetting = [[NSMutableDictionary alloc] init];
+    self.avRecorder = [[AVAudioRecorder alloc] initWithURL:fileURL settings:recordSetting error:&err];
+    if (err) {
+        NSLog(@"Failed to initialize AVAudioRecorder: %@\n", [err localizedDescription]);
+        self.avRecorder = nil;
+        // return error
+        self.errorCode = CAPTURE_INTERNAL_ERR;
+        [self dismissAudioView:nil];
+    } else {
+        self.avRecorder.delegate = self;
+        [self.avRecorder prepareToRecord];
+        self.recordButton.enabled = YES;
+        self.doneButton.enabled = YES;
+    }
+}
+
+
+-(void) setupUI
+{
+   if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) {
         self.edgesForExtendedLayout = UIRectEdgeNone;
     }
 
@@ -727,58 +795,6 @@
     [self setView:tmp];
 }
 
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, nil);
-    NSError* error = nil;
-
-    if (self.avSession == nil) {
-        // create audio session
-        self.avSession = [AVAudioSession sharedInstance];
-        if (error) {
-            // return error if can't create recording audio session
-            NSLog(@"error creating audio session: %@", [[error userInfo] description]);
-            self.errorCode = CAPTURE_INTERNAL_ERR;
-            [self dismissAudioView:nil];
-        }
-    }
-
-    [self.avSession setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
-
-    // create file to record to in temporary dir
-
-    NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];   // use file system temporary directory
-    NSError* err = nil;
-    NSFileManager* fileMgr = [[NSFileManager alloc] init];
-
-    // generate unique file name
-    NSString* filePath;
-    int i = 1;
-    do {
-        filePath = [NSString stringWithFormat:@"%@/audio_%03d.wav", docsPath, i++];
-    } while ([fileMgr fileExistsAtPath:filePath]);
-
-    NSURL* fileURL = [NSURL fileURLWithPath:filePath isDirectory:NO];
-
-    // create AVAudioPlayer
-    NSDictionary *recordSetting = [[NSMutableDictionary alloc] init];
-    self.avRecorder = [[AVAudioRecorder alloc] initWithURL:fileURL settings:recordSetting error:&err];
-    if (err) {
-        NSLog(@"Failed to initialize AVAudioRecorder: %@\n", [err localizedDescription]);
-        self.avRecorder = nil;
-        // return error
-        self.errorCode = CAPTURE_INTERNAL_ERR;
-        [self dismissAudioView:nil];
-    } else {
-        self.avRecorder.delegate = self;
-        [self.avRecorder prepareToRecord];
-        self.recordButton.enabled = YES;
-        self.doneButton.enabled = YES;
-    }
-}
-
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
 {
     UIInterfaceOrientationMask orientation = UIInterfaceOrientationMaskPortrait;
@@ -841,25 +857,25 @@
         // view cleanup will occur in audioRecordingDidFinishRecording
     } else {
         // begin recording
-        [self.recordButton setImage:stopRecordImage forState:UIControlStateNormal];
-        self.recordButton.accessibilityTraits &= ~[self accessibilityTraits];
-        [self.recordingView setHidden:NO];
         __block NSError* error = nil;
 
         __weak CDVAudioRecorderViewController* weakSelf = self;
 
         void (^startRecording)(void) = ^{
-                 [weakSelf.avSession setCategory:AVAudioSessionCategoryRecord error:&error];
+//                  [weakSelf.avSession setCategory:AVAudioSessionCategoryRecord error:&error];
                  [weakSelf.avSession setActive:YES error:&error];
                  if (error) {
                      // can't continue without active audio session
                      weakSelf.errorCode = CAPTURE_INTERNAL_ERR;
                      [weakSelf dismissAudioView:nil];
                  } else {
+                    [weakSelf.recordButton setImage:weakSelf.stopRecordImage forState:UIControlStateNormal];
+                    weakSelf.recordButton.accessibilityTraits &= ~[self accessibilityTraits];
+                    [weakSelf.recordingView setHidden:NO];
                      if (weakSelf.duration) {
                          weakSelf.isTimed = true;
                          [weakSelf.avRecorder recordForDuration:[duration doubleValue]];
-                         [weakSelf.avRecorder recordForDuration:[weakSelf.duration doubleValue]];// CHECK THAT!
+//                          [weakSelf.avRecorder recordForDuration:[weakSelf.duration doubleValue]];// CHECK THAT!
                      } else {
                          [weakSelf.avRecorder record];
                      }
@@ -876,13 +892,15 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
             [self.avSession performSelector:rrpSel withObject:^(BOOL granted){
-                if (granted) {
-                    startRecording();
-                } else {
-                    NSLog(@"Error creating audio session, microphone permission denied.");
-                    weakSelf.errorCode = CAPTURE_INTERNAL_ERR;
-                    [weakSelf dismissAudioView:nil];
-                }
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (granted) {
+                        startRecording();
+                    } else {
+                        NSLog(@"Error creating audio session, microphone permission denied.");
+                        weakSelf.errorCode = CAPTURE_INTERNAL_ERR;
+                        [weakSelf showMicrophonePermissionAlert];
+                    }
+                });
             }];
 #pragma clang diagnostic pop
         } else {
@@ -920,6 +938,24 @@
         // issue a layout notification change so that VO will reannounce the button label when recording completes
         UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
     }
+}
+
+- (void) showMicrophonePermissionAlert {
+    UIAlertController* controller =
+        [UIAlertController alertControllerWithTitle:PluginLocalizedString(captureCommand, @"Access denied", nil)
+                                            message:PluginLocalizedString(captureCommand, @"Access to the microphone has been prohibited. Please enable it in the Settings app to continue.", nil)
+                                     preferredStyle:UIAlertControllerStyleAlert];
+
+    UIAlertAction* actionOk = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+    [controller addAction:actionOk];
+
+    UIAlertAction* actionSettings = [UIAlertAction actionWithTitle:@"Settings" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:[NSDictionary dictionary] completionHandler:nil];
+    }];
+    [controller addAction:actionSettings];
+
+    __weak CDVAudioRecorderViewController* weakSelf = self;
+    [weakSelf presentViewController:controller animated:true completion:nil];
 }
 
 - (void)dismissAudioView:(id)sender
@@ -970,7 +1006,7 @@
     if (flag) {
         NSString* filePath = [avRecorder.url path];
         // NSLog(@"filePath: %@", filePath);
-        NSDictionary* fileDict = [captureCommand getMediaDictionaryFromPath:filePath ofType:@"audio/wav"];
+        NSDictionary* fileDict = [captureCommand getMediaDictionaryFromPath:filePath ofType:nil];
         NSArray* fileArray = [NSArray arrayWithObject:fileDict];
 
         self.pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:fileArray];
@@ -987,6 +1023,16 @@
     NSLog(@"error recording audio");
     self.pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageToErrorObject:CAPTURE_INTERNAL_ERR];
     [self dismissAudioView:nil];
+}
+
+- (void)presentationControllerDidDismiss:(UIPresentationController *)presentationController {
+    [self dismissAudioView:nil];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self setupUI];
 }
 
 @end
