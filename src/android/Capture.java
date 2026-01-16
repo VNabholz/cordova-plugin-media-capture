@@ -56,6 +56,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.support.v4.content.FileProvider;
 import org.apache.cordova.BuildHelper;
 
@@ -484,8 +485,11 @@ public class Capture extends CordovaPlugin {
      */
     private JSONObject createMediaFile(Uri data) {
         File fp = webView.getResourceApi().mapUriToFile(data);
+        
+        // If mapUriToFile returns null (common for content:// URIs on modern Android),
+        // handle it using ContentResolver
         if (fp == null) {
-            return null;
+            return createMediaFileFromContentUri(data);
         }
 
         JSONObject obj = new JSONObject();
@@ -536,6 +540,218 @@ public class Capture extends CordovaPlugin {
             // this will never happen
             e.printStackTrace();
         }
+        return obj;
+    }
+
+    /**
+     * Creates a JSONObject that represents a File from a content:// Uri
+     * This is used when mapUriToFile returns null, which happens for content:// URIs
+     * on modern Android devices, especially for larger video files.
+     *
+     * @param data the content:// Uri of the audio/image/video
+     * @return a JSONObject that represents a File
+     */
+    private JSONObject createMediaFileFromContentUri(Uri data) {
+        JSONObject obj = new JSONObject();
+        ContentResolver contentResolver = this.cordova.getActivity().getContentResolver();
+        
+        String displayName = null;
+        long size = 0;
+        long dateModified = 0;
+        String mimeType = null;
+
+        // Query for file metadata using OpenableColumns
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(data, 
+                new String[]{OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE}, 
+                null, null, null);
+            
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                
+                if (nameIndex >= 0) {
+                    displayName = cursor.getString(nameIndex);
+                }
+                if (sizeIndex >= 0) {
+                    size = cursor.getLong(sizeIndex);
+                }
+            }
+        } catch (Exception e) {
+            LOG.e(LOG_TAG, "Error querying content URI: " + data, e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        // If OpenableColumns didn't provide the info, try MediaStore
+        if (displayName == null || size == 0) {
+            cursor = null;
+            try {
+                String[] projection = null;
+                if (data.toString().contains("/video/")) {
+                    projection = new String[]{
+                        MediaStore.Video.Media.DISPLAY_NAME,
+                        MediaStore.Video.Media.SIZE,
+                        MediaStore.Video.Media.DATE_MODIFIED,
+                        MediaStore.Video.Media.MIME_TYPE
+                    };
+                } else if (data.toString().contains("/audio/")) {
+                    projection = new String[]{
+                        MediaStore.Audio.Media.DISPLAY_NAME,
+                        MediaStore.Audio.Media.SIZE,
+                        MediaStore.Audio.Media.DATE_MODIFIED,
+                        MediaStore.Audio.Media.MIME_TYPE
+                    };
+                } else if (data.toString().contains("/images/")) {
+                    projection = new String[]{
+                        MediaStore.Images.Media.DISPLAY_NAME,
+                        MediaStore.Images.Media.SIZE,
+                        MediaStore.Images.Media.DATE_MODIFIED,
+                        MediaStore.Images.Media.MIME_TYPE
+                    };
+                }
+                
+                if (projection != null) {
+                    cursor = contentResolver.query(data, projection, null, null, null);
+                    if (cursor != null && cursor.moveToFirst()) {
+                        int nameIndex = cursor.getColumnIndex(projection[0]);
+                        int sizeIndex = cursor.getColumnIndex(projection[1]);
+                        int dateIndex = cursor.getColumnIndex(projection[2]);
+                        int mimeIndex = projection.length > 3 ? cursor.getColumnIndex(projection[3]) : -1;
+                        
+                        if (nameIndex >= 0 && displayName == null) {
+                            displayName = cursor.getString(nameIndex);
+                        }
+                        if (sizeIndex >= 0 && size == 0) {
+                            size = cursor.getLong(sizeIndex);
+                        }
+                        if (dateIndex >= 0) {
+                            dateModified = cursor.getLong(dateIndex) * 1000; // Convert seconds to milliseconds
+                        }
+                        if (mimeIndex >= 0) {
+                            mimeType = cursor.getString(mimeIndex);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOG.e(LOG_TAG, "Error querying MediaStore for URI: " + data, e);
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+
+        // Get mime type from ContentResolver if not already obtained
+        if (mimeType == null || mimeType.isEmpty()) {
+            mimeType = contentResolver.getType(data);
+        }
+
+        // Fallback for display name
+        if (displayName == null || displayName.isEmpty()) {
+            displayName = "media_" + System.currentTimeMillis();
+            // Try to infer extension from mime type
+            if (mimeType != null) {
+                if (mimeType.contains("video")) {
+                    if (mimeType.contains("mp4")) {
+                        displayName += ".mp4";
+                    } else if (mimeType.contains("3gpp")) {
+                        displayName += ".3gp";
+                    } else {
+                        displayName += ".mp4";
+                    }
+                } else if (mimeType.contains("audio")) {
+                    displayName += ".3gp";
+                } else if (mimeType.contains("image")) {
+                    displayName += ".jpg";
+                }
+            }
+        }
+
+        // Fallback for date modified
+        if (dateModified == 0) {
+            dateModified = System.currentTimeMillis();
+        }
+
+        try {
+            Class webViewClass = webView.getClass();
+            PluginManager pm = null;
+            try {
+                Method gpm = webViewClass.getMethod("getPluginManager");
+                pm = (PluginManager) gpm.invoke(webView);
+            } catch (NoSuchMethodException e) {
+            } catch (IllegalAccessException e) {
+            } catch (InvocationTargetException e) {
+            }
+            if (pm == null) {
+                try {
+                    Field pmf = webViewClass.getField("pluginManager");
+                    pm = (PluginManager)pmf.get(webView);
+                } catch (NoSuchFieldException e) {
+                } catch (IllegalAccessException e) {
+                }
+            }
+            
+            // Try to get localURL for content URI
+            // For content:// URIs, localURL may not be available, which is acceptable
+            if (pm != null) {
+                FileUtils filePlugin = (FileUtils) pm.getPlugin("File");
+                if (filePlugin != null) {
+                    try {
+                        // Try to resolve using the URI - this may not work for content:// URIs
+                        // but we'll try anyway
+                        LocalFilesystemURL url = filePlugin.filesystemURLforLocalPath(data.toString());
+                        if (url != null) {
+                            obj.put("localURL", url.toString());
+                        }
+                        // If it fails, that's okay - content URIs work with fullPath
+                    } catch (Exception e) {
+                        LOG.d(LOG_TAG, "Could not resolve localURL for URI: " + data, e);
+                        // This is expected for content:// URIs, so we continue
+                    }
+                }
+            }
+
+            // File properties
+            obj.put("name", displayName);
+            obj.put("fullPath", data.toString());
+            
+            // Determine mime type
+            if (mimeType != null && !mimeType.isEmpty()) {
+                if (mimeType.equals(VIDEO_3GPP) || mimeType.equals(VIDEO_MP4)) {
+                    if (data.toString().contains("/audio/")) {
+                        obj.put("type", AUDIO_3GPP);
+                    } else {
+                        obj.put("type", mimeType);
+                    }
+                } else {
+                    obj.put("type", mimeType);
+                }
+            } else {
+                // Fallback mime type detection
+                if (data.toString().contains("/video/")) {
+                    if (displayName.endsWith(".3gp") || displayName.endsWith(".3gpp")) {
+                        obj.put("type", VIDEO_3GPP);
+                    } else {
+                        obj.put("type", VIDEO_MP4);
+                    }
+                } else if (data.toString().contains("/audio/")) {
+                    obj.put("type", AUDIO_3GPP);
+                } else {
+                    obj.put("type", FileHelper.getMimeType(data, cordova));
+                }
+            }
+
+            obj.put("lastModifiedDate", dateModified);
+            obj.put("size", size);
+        } catch (JSONException e) {
+            LOG.e(LOG_TAG, "Error creating JSONObject for media file", e);
+            return null;
+        }
+        
         return obj;
     }
 
